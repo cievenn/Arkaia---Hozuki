@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useMouseLerp } from '../../hooks/useMouseLerp';
 
 /**
@@ -34,8 +34,8 @@ export const InkCursor = () => {
       isHoveringInteractive.current = false;
     };
 
-    document.addEventListener('mouseover', handleMouseOver);
-    document.addEventListener('mouseout', handleMouseOut);
+    document.addEventListener('mouseover', handleMouseOver, { passive: true });
+    document.addEventListener('mouseout', handleMouseOut, { passive: true });
 
     return () => {
       document.removeEventListener('mouseover', handleMouseOver);

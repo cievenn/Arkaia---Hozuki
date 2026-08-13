@@ -1,61 +1,117 @@
-import React, { useMemo } from 'react';
+import React, { useRef, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
-/**
- * BloodMetaballs (Renamed to AbyssalCurrents)
- * Des courants d'eau et bulles abyssales.
- * OPTIMISÉ : Retrait du SVG filter Gooey très lourd. Utilisation de box-shadow pour adoucir les bords.
- */
-export const BloodMetaballs = ({ count = 8, className = '' }) => {
-  const blobs = useMemo(() => {
-    const seed = [
-      { x: 15,  y: 80,  r: 120, anim: 'blob-drift-1', dur: '9s',  delay: '0s'   },
-      { x: 45,  y: 90,  r: 90,  anim: 'blob-drift-2', dur: '13s', delay: '2s'   },
-      { x: 70,  y: 70,  r: 140, anim: 'blob-drift-3', dur: '11s', delay: '1s'   },
-      { x: 30,  y: 85,  r: 80,  anim: 'blob-drift-4', dur: '15s', delay: '3s'   },
-      { x: 80,  y: 95,  r: 100, anim: 'blob-drift-5', dur: '8s',  delay: '0.5s' },
-      { x: 55,  y: 85,  r: 70,  anim: 'blob-drift-1', dur: '12s', delay: '4s'   },
-      { x: 10,  y: 98,  r: 110, anim: 'blob-drift-3', dur: '10s', delay: '1.5s' },
-      { x: 90,  y: 88,  r: 85,  anim: 'blob-drift-2', dur: '14s', delay: '2.5s' },
-      { x: 60,  y: 92,  r: 65,  anim: 'blob-drift-4', dur: '7s',  delay: '5s'   },
-      { x: 25,  y: 75,  r: 95,  anim: 'blob-drift-5', dur: '16s', delay: '0.8s' },
-    ];
-    return seed.slice(0, Math.max(count, 4));
-  }, [count]);
+const fragmentShader = `
+uniform float u_time;
+uniform vec2 u_resolution;
+
+// Pseudo-random noise function
+float random(in vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+void main() {
+    // Normalize coordinates
+    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+    // Aspect ratio correction
+    vec2 p = uv;
+    p.x *= u_resolution.x / u_resolution.y;
+
+    float sum = 0.0;
+    
+    // Generate 8 animated blobs
+    for(int i = 0; i < 8; i++) {
+        float fi = float(i);
+        
+        // Distribute bases mainly in the lower area
+        float baseX = random(vec2(fi, 1.0)) * (u_resolution.x / u_resolution.y);
+        float baseY = 0.7 + random(vec2(fi, 2.0)) * 0.3;
+        
+        // Different speeds and offsets
+        float speed = 0.2 + random(vec2(fi, 3.0)) * 0.4;
+        float offsetTime = u_time * speed + random(vec2(fi, 4.0)) * 10.0;
+        
+        vec2 pos = vec2(
+            baseX + sin(offsetTime * 0.8) * 0.2,
+            baseY + cos(offsetTime) * 0.2
+        );
+        
+        float radius = 0.08 + random(vec2(fi, 5.0)) * 0.06;
+        
+        float dist = distance(p, pos);
+        sum += (radius * radius) / (dist * dist);
+    }
+    
+    // Smooth thresholding for metaballs effect
+    float alpha = smoothstep(0.4, 0.9, sum);
+    
+    // Gradient from darker cyan on the edges to bright cyan in the center
+    vec3 colorEdge = vec3(0.024, 0.714, 0.831); // rgba(6, 182, 212)
+    vec3 colorCenter = vec3(0.133, 0.827, 0.933); // rgba(34, 211, 238)
+    vec3 finalColor = mix(colorEdge, colorCenter, smoothstep(0.7, 1.5, sum));
+    
+    // Soft overall opacity
+    gl_FragColor = vec4(finalColor, alpha * 0.2);
+}
+`;
+
+const vertexShader = `
+void main() {
+    gl_Position = vec4(position, 1.0);
+}
+`;
+
+const MetaballsMaterial = () => {
+  const materialRef = useRef();
+
+  const uniforms = useMemo(
+    () => ({
+      u_time: { value: 0 },
+      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+    }),
+    []
+  );
+
+  useFrame((state) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.u_time.value = state.clock.elapsedTime;
+      // Keep resolution uniform updated
+      materialRef.current.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+    }
+  });
 
   return (
+    <shaderMaterial
+      ref={materialRef}
+      vertexShader={vertexShader}
+      fragmentShader={fragmentShader}
+      uniforms={uniforms}
+      transparent={true}
+      blending={THREE.AdditiveBlending}
+      depthWrite={false}
+    />
+  );
+};
+
+export const BloodMetaballs = ({ count = 8, className = '' }) => {
+  return (
     <>
+      {/* 
+        WebGL Canvas taking over the metaballs effect 
+        Performance is drastically improved as calculations are done on the GPU 
+      */}
       <div
-        className={`fixed inset-0 pointer-events-none z-0 overflow-hidden ${className}`}
+        className={\`fixed inset-0 pointer-events-none z-0 overflow-hidden \${className}\`}
         aria-hidden="true"
-        style={{
-          // On ajoute un mix-blend-mode léger pour fondre les bulles entres elles
-          mixBlendMode: 'screen',
-        }}
+        style={{ mixBlendMode: 'screen' }}
       >
-        {blobs.map((blob, i) => (
-          <div
-            key={i}
-            style={{
-              position:        'absolute',
-              left:            `${blob.x}%`,
-              top:             `${blob.y}%`,
-              width:           `${blob.r}px`,
-              height:          `${blob.r}px`,
-              transform:       'translate(-50%, -50%)',
-              background:      `radial-gradient(circle at 35% 35%,
-                                  rgba(34, 211, 238, 0.15) 0%,
-                                  rgba(6, 182, 212, 0.05) 50%,
-                                  transparent 100%)`,
-              // L'adoucissement via box-shadow remplace le flou SVG lourd
-              boxShadow:       '0 0 30px rgba(6, 182, 212, 0.1)',
-              animation:       `${blob.anim} ${blob.dur} ${blob.delay} infinite ease-in-out`,
-              willChange:      'transform',
-              borderRadius:    i % 2 === 0
-                ? '60% 40% 55% 45% / 45% 55% 40% 60%'
-                : '45% 55% 40% 60% / 60% 40% 55% 45%',
-            }}
-          />
-        ))}
+        <Canvas camera={{ position: [0, 0, 1] }} dpr={[1, 1.5]} gl={{ antialias: false }}>
+          <mesh>
+            <planeGeometry args={[2, 2]} />
+            <MetaballsMaterial />
+          </mesh>
+        </Canvas>
       </div>
 
       <div

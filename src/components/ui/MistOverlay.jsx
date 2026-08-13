@@ -17,7 +17,7 @@ export const MistOverlay = () => (
         // Un dégradé plus doux pour simuler le flou
         background: 'linear-gradient(to bottom, rgba(6, 182, 212, 0.06) 0%, rgba(6, 182, 212, 0.02) 40%, transparent 100%)',
         animation:  'mist-float 14s infinite ease-in-out',
-        willChange: 'transform', // Déporte sur le GPU
+        willChange: 'transform, opacity', // Déporte sur le GPU
       }}
     />
 
@@ -29,7 +29,7 @@ export const MistOverlay = () => (
         height:     '30vh',
         background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.04) 0%, rgba(34, 211, 238, 0.01) 50%, transparent 100%)',
         animation:  'mist-float 20s infinite ease-in-out reverse',
-        willChange: 'transform',
+        willChange: 'transform, opacity',
       }}
     />
 
@@ -41,7 +41,7 @@ export const MistOverlay = () => (
         height:     '30vh',
         background: 'linear-gradient(to top, rgba(8, 145, 178, 0.05) 0%, transparent 100%)',
         animation:  'mist-float 18s 3s infinite ease-in-out',
-        willChange: 'transform',
+        willChange: 'transform, opacity',
       }}
     />
 
