@@ -8,7 +8,7 @@ import { PageWrapper } from '../components/layout/PageWrapper';
 
 const TRAITS = [
   {
-    title: "L'État Liquide (L'Ennui et le Troll)",
+    title: "L'État Liquide (L'Ennui)",
     subtitle: "Son état par défaut",
     content: "Kiyoshi est un pitre insupportable. Il prend tout à la légère, donne des surnoms mignons aux tueurs les plus sanguinaires du village, et répond aux menaces de mort par des blagues enfantines. Il utilise l'ironie comme une arme d'humiliation massive. Si un ennemi hurle de rage devant lui, Kiyoshi va s'asseoir par terre, bâiller, et lui demander s'il a bientôt fini sa crise de nerfs.",
     align: "left"
