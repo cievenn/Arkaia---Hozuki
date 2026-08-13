@@ -1,0 +1,206 @@
+/* =========================================================
+   HOZUKI — DESIGN SYSTEM
+   DA : Eau, Brume, Verre, Froid, Clinique, Minimaliste
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --abyss-deep:   #020813;
+  --abyss-blue:   #0a1128;
+  --water-foam:   #e0f2fe;
+  --water-foam-dark: #bae6fd;
+  
+  --cyan-predator: #0ea5e9;
+  --cyan-bright:   #38bdf8;
+  --cyan-dark:     #0284c7;
+  
+  --shark-skin:    #1e293b;
+  --shark-dark:    #0f172a;
+
+  /* TYPOGRAPHIE */
+  --font-noble:  'Space Grotesk', sans-serif;
+  --font-body:   'Outfit', sans-serif;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── RESET ──────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--abyss-deep);
+  color: var(--water-foam);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  background-image: linear-gradient(180deg, var(--abyss-deep) 0%, var(--abyss-blue) 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+* { cursor: none !important; }
+
+.font-noble    { font-family: var(--font-noble); text-transform: uppercase; letter-spacing: 0.1em; }
+.font-body     { font-family: var(--font-body); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--abyss-deep); }
+::-webkit-scrollbar-thumb { background: var(--shark-skin); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan-dark); }
+
+::selection {
+  background: rgba(56, 189, 248, 0.2);
+  color: #fff;
+}
+
+/* ─── ANIMATIONS OPTIMISÉES (GPU Accelerated) ───────────── */
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mist-drift {
+  0%   { transform: translateX(-2%) translateY(-1%); opacity: 0.1; }
+  50%  { transform: translateX(2%) translateY(1%); opacity: 0.3; }
+  100% { transform: translateX(-2%) translateY(-1%); opacity: 0.1; }
+}
+
+.animate-mist        { animation: mist-drift 20s infinite ease-in-out; will-change: transform, opacity; }
+.animate-mist-slow   { animation: mist-drift 30s infinite ease-in-out reverse; will-change: transform, opacity; }
+.animate-mist-rise   { animation: mist-drift 15s infinite ease-in-out alternate; will-change: transform, opacity; }
+
+@keyframes subtle-pulse {
+  0% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0.8; transform: scale(1); }
+}
+.animate-pulse-cyan {
+  animation: subtle-pulse 4s infinite ease-in-out;
+}
+
+@keyframes glitch-minimal {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  92% { opacity: 1; transform: translateX(0); }
+  94% { opacity: 0.8; transform: translateX(2px); }
+  96% { opacity: 0.9; transform: translateX(-1px); }
+  98% { opacity: 1; transform: translateX(0); }
+}
+.animate-stutter { animation: glitch-minimal 5s infinite; }
+
+/* ANIMATIONS — INTRO */
+@keyframes intro-fade-out {
+  0%   { opacity: 1; filter: blur(0px); }
+  70%  { opacity: 1; filter: blur(0px); }
+  100% { opacity: 0; filter: blur(10px); pointer-events: none; }
+}
+@keyframes text-reveal {
+  0% { opacity: 0; filter: blur(10px); transform: translateY(10px); }
+  100% { opacity: 1; filter: blur(0px); transform: translateY(0); }
+}
+
+/* ─── EFFETS UI : GLASSMORPHISM & NEON ───────────────────── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(56, 189, 248, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), transparent);
+  opacity: 0.5;
+}
+
+.cyan-glow {
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.text-stroke-cyan {
+  -webkit-text-stroke: 1px rgba(56, 189, 248, 0.3);
+  color: transparent;
+}
+
+/* On retire l'effet baveux (ink-bleed) pour un glow clinique */
+.clinical-glow {
+  position: relative;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.overflow-visible-x { overflow-x: visible !important; }
+
+/* ─── GRID SYSTEMS ───────────────────────────────────────── */
+.grid-responsive-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 3.5vw, 3.5rem);
+  align-items: start;
+}
+
+.grid-responsive-asym {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.grid-responsive-num {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: clamp(1rem, 3vw, 3rem);
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .grid-responsive-2, .grid-responsive-asym { grid-template-columns: 1fr; gap: 1.5rem; }
+  .grid-responsive-num { grid-template-columns: 60px 1fr; gap: 0.8rem; }
+  .mobile-no-offset { margin-left: 0 !important; }
+  main { padding-bottom: 5.5rem !important; }
+}
+
+@media (max-width: 767px) {
+  main {
+    padding-left: clamp(1rem, 5vw, 2rem) !important;
+    padding-right: clamp(1rem, 5vw, 2rem) !important;
+  }
+}
